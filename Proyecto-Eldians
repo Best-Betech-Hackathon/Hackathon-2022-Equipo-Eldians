@@ -1,6 +1,6 @@
 importScripts('lib/tank.js');
 
-// timer of tank turns. Whenever the tank hits a wall, the timer
+//  timer of tank turns. Whenever the tank hits a wall, the timer
 // will be set to a positive integer. Within each simulation step
 // the timer will be decreased by one eventually hitting zero.
 // The tank will keep turning as long as turnTime is above zero.
@@ -71,16 +71,19 @@ function exploreBattlefiield(state, control) {
     control.THROTTLE = 0;
     return;
   }
-
-  if(state.collisions.wall || turnTime > 0 || state.radar.enemy) {
+	/*if(empezando == true && (state.radar.wallDistance>0 && state.radar.wallDistance<300)){
+  	control.TURN( state.radar.angle + state.angle);
+  }*/
+  
+  if((state.radar.wallDistance>0 && state.radar.wallDistance<80) || turnTime > 0 || state.radar.enemy) {
     control.THROTTLE = 0;
   } else {
     control.THROTTLE = 1;
   }
 
-  if(state.collisions.wall) {
+  if((state.radar.wallDistance>0 && state.radar.wallDistance<80) ) {
     // start turning when hitting a wall
-    turnTime = 10;
+    turnTime = 15;
   }
 
   // keep turning whenever turn timer is above zero
