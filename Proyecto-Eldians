@@ -1,6 +1,6 @@
 importScripts('lib/tank.js');
 
-// timer of tank turns. Whenever the tank hits a wall, the timer
+//  timer of tank turns. Whenever the tank hits a wall, the timer
 // will be set to a positive integer. Within each simulation step
 // the timer will be decreased by one eventually hitting zero.
 // The tank will keep turning as long as turnTime is above zero.
@@ -16,7 +16,7 @@ function shootEnemy(state, control) {
   }
 
   // predict position of moving target
-  let bulletSpeed = 4;
+  let bulletSpeed = 7;
   let distance = Math.distance(state.x, state.y, enemy.x, enemy.y)
   let bulletTime = distance / bulletSpeed;
   let targetX = enemy.x + bulletTime * enemy.speed * Math.cos(Math.deg2rad(enemy.angle));
@@ -24,16 +24,15 @@ function shootEnemy(state, control) {
 
   // calculate desired direction of the gun
   let targetAngle = Math.deg.atan2(targetY - state.y, targetX - state.x);
+  
+ //Mejora la cadencia del disparo para evitar que se escapen
+  
   let gunAngle = Math.deg.normalize(targetAngle - state.angle);
 
   // point the gun at the target
-  let angleDiff = Math.deg.normalize(gunAngle - state.gun.angle);
-  control.GUN_TURN = 0.3 * angleDiff;
-
-  // shoot when aiming at target
-  if(Math.abs(angleDiff) < 1) {
-    control.SHOOT = 1;
-  }
+  let angleDiff = Math.deg.normalize(gunAngle - (state.gun.angle));
+  control.GUN_TURN = 0.1 * angleDiff;
+	control.SHOOT = 0.1;
 }
 
 // SCAN ENEMY ---------------------------------------------------------------------------------
@@ -71,16 +70,19 @@ function exploreBattlefiield(state, control) {
     control.THROTTLE = 0;
     return;
   }
-
-  if(state.collisions.wall || turnTime > 0 || state.radar.enemy) {
+	/*if(empezando == true && (state.radar.wallDistance>0 && state.radar.wallDistance<300)){
+  	control.TURN( state.radar.angle + state.angle);
+  }*/
+  
+  if((state.radar.wallDistance>0 && state.radar.wallDistance<80) || turnTime > 0 || state.radar.enemy) {
     control.THROTTLE = 0;
   } else {
     control.THROTTLE = 1;
   }
 
-  if(state.collisions.wall) {
+  if((state.radar.wallDistance>0 && state.radar.wallDistance<80) ) {
     // start turning when hitting a wall
-    turnTime = 10;
+    turnTime = 15;
   }
 
   // keep turning whenever turn timer is above zero
