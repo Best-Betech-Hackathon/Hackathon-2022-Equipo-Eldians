@@ -16,7 +16,7 @@ function shootEnemy(state, control) {
   }
 
   // predict position of moving target
-  let bulletSpeed = 4;
+  let bulletSpeed = 7;
   let distance = Math.distance(state.x, state.y, enemy.x, enemy.y)
   let bulletTime = distance / bulletSpeed;
   let targetX = enemy.x + bulletTime * enemy.speed * Math.cos(Math.deg2rad(enemy.angle));
@@ -24,16 +24,15 @@ function shootEnemy(state, control) {
 
   // calculate desired direction of the gun
   let targetAngle = Math.deg.atan2(targetY - state.y, targetX - state.x);
+  
+ //Mejora la cadencia del disparo para evitar que se escapen
+  
   let gunAngle = Math.deg.normalize(targetAngle - state.angle);
 
   // point the gun at the target
-  let angleDiff = Math.deg.normalize(gunAngle - state.gun.angle);
-  control.GUN_TURN = 0.3 * angleDiff;
-
-  // shoot when aiming at target
-  if(Math.abs(angleDiff) < 1) {
-    control.SHOOT = 1;
-  }
+  let angleDiff = Math.deg.normalize(gunAngle - (state.gun.angle));
+  control.GUN_TURN = 0.1 * angleDiff;
+	control.SHOOT = 0.1;
 }
 
 // SCAN ENEMY ---------------------------------------------------------------------------------
@@ -44,9 +43,10 @@ function scanEnemy(state, control) {
   } else {
     //keep the enemy in the middle of radar beam
     let targetAngle = Math.deg.atan2(state.radar.enemy.y - state.y, state.radar.enemy.x - state.x);
-    let radarAngle = Math.deg.normalize(targetAngle - state.angle);
-    let angleDiff = Math.deg.normalize(radarAngle - state.radar.angle);
-    control.RADAR_TURN = angleDiff;
+    let radarAngle = Math.deg.normalize(targetAngle - (state.angle+state.radar.angle));
+  
+    control.RADAR_TURN = radarAngle*0.2;
+  	followEnemy(state, control);
   }
 }
 
@@ -57,12 +57,37 @@ function followEnemy(state, control) {
   }
 
   let targetAngle = Math.deg.atan2(state.radar.enemy.y - state.y, state.radar.enemy.x - state.x);
-  let bodyAngleDiff = Math.deg.normalize(targetAngle - state.angle);
-  control.TURN = 0.5 * bodyAngleDiff;
+  bodyAngle = Math.deg.normalize(targetAngle  - state.angle);
+  //hacer antes de que te disparen para esquivar
+  //if(Math.abs(bodyAngle) > 90) bodyAngle += 180;
+  
+  
+	if (state.radar.enemy.energy<50){
+  	
+  	control.TURN = bodyAngle * 0.2;
 
-  let targetDistance = Math.distance(state.x, state.y, state.radar.enemy.x, state.radar.enemy.y);
-  let distanceDiff = targetDistance - 150;
-  control.THROTTLE = distanceDiff/100;
+	
+ 	  let targetDistance = Math.distance(state.x, state.y, state.radar.enemy.x, state.radar.enemy.y);
+  	let distanceDiff = targetDistance - 100;
+  	if (distanceDiff>100){
+  		control.BOOST =1;
+  	}
+  	control.THROTTLE = distanceDiff/100;
+    shootEnemy(state, control)
+  }
+  else {
+  	
+  	control.TURN = bodyAngle * 0.2;
+  	/*let bodyAngleDiff = Math.deg.normalize(targetAngle - state.angle);
+  	control.TURN = 0.5 * bodyAngleDiff;*/
+	
+ 	  let targetDistance = Math.distance(state.x, state.y, state.radar.enemy.x, state.radar.enemy.y);
+  	let distanceDiff = targetDistance - 100;
+    
+  	control.THROTTLE = distanceDiff/100;
+    
+    shootEnemy(state, control)
+  }
 }
 
 // EXPLORE THE BATTLEFIELD ---------------------------------------------------------------------------------
