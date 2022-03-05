@@ -1,6 +1,6 @@
 importScripts('lib/tank.js');
 
-// timer of tank turns. Whenever the tank hits a wall, the timer
+//  timer of tank turns. Whenever the tank hits a wall, the timer
 // will be set to a positive integer. Within each simulation step
 // the timer will be decreased by one eventually hitting zero.
 // The tank will keep turning as long as turnTime is above zero.
